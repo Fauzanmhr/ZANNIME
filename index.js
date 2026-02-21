@@ -1,7 +1,6 @@
 import express from "express";
 import "dotenv/config";
 import path from "path";
-import { fileURLToPath } from "url";
 import {
   animeRoutes,
   genreRoutes,
@@ -10,8 +9,7 @@ import {
 } from "./routes/Routes.js";
 import { fetchAllAnimeData } from "./services/animeService.js";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const __dirname = import.meta.dirname;
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -54,7 +52,7 @@ const fetchAllSourcesData = async () => {
   console.log(`Data loaded: ${data.length} anime from otakudesu`);
 };
 
-(async () => await fetchAllSourcesData())();
+await fetchAllSourcesData();
 
 app.use(
   "/",
