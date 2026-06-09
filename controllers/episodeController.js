@@ -10,27 +10,7 @@ export const getEpisode = async (req, res) => {
   const episode = await fetchEpisodeDetails(episodeSlug);
 
   if (episode) {
-    const normalizedEpisode = { ...episode };
-
-    const downloadUrl = episode.downloadUrl || {};
-    if (Array.isArray(downloadUrl.formats) && downloadUrl.formats.length > 0) {
-      normalizedEpisode.standardizedDownloads = {
-        mode: "formats",
-        formats: downloadUrl.formats,
-      };
-    } else if (
-      Array.isArray(downloadUrl.qualities) &&
-      downloadUrl.qualities.length > 0
-    ) {
-      normalizedEpisode.standardizedDownloads = {
-        mode: "qualities",
-        qualities: downloadUrl.qualities,
-      };
-    } else {
-      normalizedEpisode.standardizedDownloads = null;
-    }
-
-    res.render("episode", { episode: normalizedEpisode });
+    res.render("episode", { episode });
   } else {
     res.status(404).send("Episode not found");
   }

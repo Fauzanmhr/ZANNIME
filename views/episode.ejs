@@ -152,7 +152,7 @@
       if (selectedValue.startsWith('http')) {
         iframe.src = selectedValue;
       } else {
-        const response = await fetch(`/server-url?serverId=${selectedValue}`);
+        const response = await fetch(`/server-url?serverId=${encodeURIComponent(selectedValue)}`);
         const data = await response.json();
         if (data.url) {
           iframe.src = data.url;

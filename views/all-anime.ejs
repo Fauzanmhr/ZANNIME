@@ -48,7 +48,7 @@
           updatePagination(data.currentPage, data.totalPages, paginationContainer);
         });
     } else {
-      fetch(`/search-ajax?q=${query}&page=${page}&limit=${limit}`)
+      fetch(`/search-ajax?q=${encodeURIComponent(query)}&page=${page}&limit=${limit}`)
         .then(response => response.json())
         .then(data => {
           updateResults(data.results, resultsContainer);
@@ -85,7 +85,7 @@
 
       const tdAction = document.createElement('td');
       const viewLink = document.createElement('a');
-    viewLink.href = `/anime/${result.animeId}`;
+      viewLink.href = `/anime/${result.animeId}`;
       viewLink.className = 'btn btn-dark btn-sm';
       viewLink.textContent = 'View';
       tdAction.appendChild(viewLink);

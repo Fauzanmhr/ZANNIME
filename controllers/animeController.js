@@ -3,9 +3,10 @@ import {
   fetchAnimeDetails,
   fetchBatchDetails,
 } from "../services/animeService.js";
+import { paginate, parsePositiveInt } from "../utils/pagination.js";
 
 export const getOngoingAnime = async (req, res) => {
-  const page = req.query.page || 1;
+  const page = parsePositiveInt(req.query.page, 1);
   const result = await fetchOngoingAnime(page);
   res.render("index", {
     animes: result.data,
@@ -35,56 +36,46 @@ export const getBatchDetails = async (req, res) => {
 };
 
 export const searchAnime = (req, res) => {
-  const { q: query, page = 1, limit = 20 } = req.query;
+  const query = String(req.query.q || "").trim();
   if (!query) return res.json({ results: [] });
 
-  const allAnimeData = req.app.locals.currentAnimeData;
+  const allAnimeData = req.app.locals.currentAnimeData || [];
   const filteredResults = allAnimeData.filter((anime) =>
     anime.title.toLowerCase().includes(query.toLowerCase()),
   );
-  const startIndex = (page - 1) * limit;
-  const endIndex = page * limit;
-  const results = filteredResults.slice(startIndex, endIndex);
+  const page = parsePositiveInt(req.query.page, 1);
+  const limit = parsePositiveInt(req.query.limit, 20);
+  const { results, currentPage, totalPages } = paginate(filteredResults, {
+    page,
+    limit,
+  });
 
   res.json({
     results,
-    currentPage: parseInt(page, 10),
-    totalPages: Math.ceil(filteredResults.length / limit),
+    currentPage,
+    totalPages,
   });
 };
 
 export const getAllAnimeAjax = (req, res) => {
-  const { page = 1, limit = 20 } = req.query;
-  const allAnimeData = req.app.locals.currentAnimeData;
-
-  const startIndex = (page - 1) * limit;
-  const endIndex = page * limit;
-  const results = allAnimeData.slice(startIndex, endIndex);
+  const allAnimeData = req.app.locals.currentAnimeData || [];
+  const { results, currentPage, totalPages } = paginate(allAnimeData, {
+    page: req.query.page,
+    limit: req.query.limit,
+  });
 
   res.json({
     results,
-    currentPage: parseInt(page, 10),
-    totalPages: Math.ceil(allAnimeData.length / limit),
+    currentPage,
+    totalPages,
   });
 };
 
 export const renderAllAnimePage = (req, res) => {
-  const { page = 1 } = req.query;
-  const limit = 20;
-  const allAnimeData = req.app.locals.currentAnimeData;
+  const allAnimeData = req.app.locals.currentAnimeData || [];
+  const { results, ...pagination } = paginate(allAnimeData, {
+    page: req.query.page,
+  });
 
-  const totalAnimes = allAnimeData.length;
-  const totalPages = Math.ceil(totalAnimes / limit);
-  const startIndex = (page - 1) * limit;
-  const endIndex = startIndex + limit;
-  const paginatedAnimes = allAnimeData.slice(startIndex, endIndex);
-
-  const pagination = {
-    currentPage: page,
-    totalPages,
-    prevPage: page > 1 ? page - 1 : null,
-    nextPage: page < totalPages ? page + 1 : null,
-  };
-
-  res.render("all-anime", { animes: paginatedAnimes, pagination });
+  res.render("all-anime", { animes: results, pagination });
 };

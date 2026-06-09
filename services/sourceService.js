@@ -8,9 +8,7 @@ export const makeApiRequest = async (endpoint, params = {}) => {
   try {
     return await ky.get(url, { searchParams: params }).json();
   } catch (error) {
-    // Log the specific endpoint and error
-    console.error(`Error fetching from ${url}:`, error.message); 
-    // Return a consistent structure on error
-    return { data: null, pagination: {} }; 
+    console.error(`Error fetching from ${url}:`, error?.message || error);
+    return { data: null, pagination: {} };
   }
 };

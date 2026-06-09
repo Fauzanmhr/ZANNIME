@@ -28,6 +28,24 @@ const deriveDefaultStreamingUrl = (qualities) => {
   return null;
 };
 
+const normalizeDownloads = (downloadUrl = {}) => {
+  if (Array.isArray(downloadUrl.formats) && downloadUrl.formats.length > 0) {
+    return {
+      mode: "formats",
+      formats: downloadUrl.formats,
+    };
+  }
+
+  if (Array.isArray(downloadUrl.qualities) && downloadUrl.qualities.length > 0) {
+    return {
+      mode: "qualities",
+      qualities: downloadUrl.qualities,
+    };
+  }
+
+  return null;
+};
+
 export const fetchEpisodeDetails = async (episodeId) => {
   const response = await makeApiRequest(`/episode/${episodeId}`);
   const details = response.data?.details;
@@ -40,13 +58,18 @@ export const fetchEpisodeDetails = async (episodeId) => {
   const defaultStreamingUrl =
     details.defaultStreamingUrl || deriveDefaultStreamingUrl(serverQualities);
 
-  return {
+  const episode = {
     ...details,
     defaultStreamingUrl,
     server: { qualities: serverQualities },
     downloadUrl: {
       qualities: normalizeDownloadQualityList(details.download?.qualityList),
     },
+  };
+
+  return {
+    ...episode,
+    standardizedDownloads: normalizeDownloads(episode.downloadUrl),
   };
 };
 
